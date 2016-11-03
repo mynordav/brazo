@@ -9,7 +9,8 @@ function [Jv, Jw] = getJacobian(varargin)
     %Debido a que hay que obtener z0 en la primera iteración y z0
     %siempre es [0 0 1]' la primera vez es necesario multiplicar por 
     %la identidad
-    
+    A(:,:,1) = eye(4);
+
     %Vectores auxiliares para obtener los valores de zi-1 y Oi-1
     k = [0 0 1]';
     O = [0 0 0 1]';
@@ -24,15 +25,14 @@ function [Jv, Jw] = getJacobian(varargin)
         A(:,:,i+1) = varargin{i};
         A_0n = A_0n*varargin{i};
     end
-    A(:,:,1) = eye(4);
 
     %Obtener posición de On conrespecto al SC inercial
     O_0n = A_0n*O;
-    O_0n = O_0n(1:3,:);
+    O_0n = O_0n(1:3);
     
     %Matriz auxiliar para representar una transformación del
     %SC i-1 en coordenadas del SC inercial
-    A_0i_i = eye(4);
+    A_0im1 = eye(4);
     
     
     for i = 1:nargin
@@ -40,12 +40,12 @@ function [Jv, Jw] = getJacobian(varargin)
         Jw(:,i) = A(1:3,1:3,i)*k;
         
         %Obtener origen del SC i-1 con respecto a SC0
-        A_0i_i = A_0i_i*A(:,:,i);
-        O_i_1 = A_0i_i*O;
-        O_i_1 = O_i_1(1:3,:);
+        A_0im1 = A_0im1*A(:,:,i);
+        O_im1 = A_0im1*O;
+        O_im1 = O_im1(1:3);
         
         %Jacobiano de vel lineal
-        Jv(:,i) = cross(Jw(:,i), O_0n - O_i_1);
+        Jv(:,i) = cross(Jw(:,i), O_0n - O_im1);
     end
     
 end
