@@ -33,9 +33,6 @@ function dX = Brazo_sys(t, X)
 
     pinvJ = pinv(J);
     
-    J*pinvJ
-    rank(J)
-    
     U = pinvJ*(dref + K*ref - K*X(1:3));
     
     dX = B*U;
