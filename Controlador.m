@@ -18,7 +18,7 @@ C = [eye(3),zeros(3,4)];
 K = 10;
 
 %Resolver ODE's
-tspan = [0 50];
+tspan = [0 25];
 [t, X] = ode23t(@Brazo_sys, tspan, [p0(1:3);th0], odeset('AbsTol', 1e-12));
 
 
@@ -29,7 +29,11 @@ figure(1)
 p = zeros(4,4);
 colors = ['r', 'g', 'b', 'm'];
 
+tstep = (t(end) - t(1))/numel(t);
+tanterior = t(1);
+
 for i = 1:numel(t)
+    
     clf('reset');
     
     p(:,1) = [0 0 0 1];
@@ -45,9 +49,17 @@ for i = 1:numel(t)
     end
     
     plot3(X(1:i,1),X(1:i,2),X(1:i,3));
+    
     grid on;
-    axis([-10 10 -10 10 0 13]);  view([0 0 4]);
-    pause(0.1);
+    axis([-7 7 -7 7 -1 13]);
+    axis square
+    view(135, 30);
+    
+    tfactor = (t(i) - tanterior)/tstep;
+    
+    tanterior = t(i);
+    
+    pause(0.0125*tfactor);
 end
 hold off;
 
