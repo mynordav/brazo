@@ -1,13 +1,13 @@
 function Example_DK(t_lim, step, config, DH)
 
-%Define un manipulador con sus parÃ¡metros DH y config y calcula la
-%cinemÃ¡tica directa para varios valores de q
+%Define un manipulador con sus parámetros DH y config y calcula la
+%cinemática directa para varios valores de q
 % DH(i,:) = {a_i,alpha_i,d_i,theta_i}
 
     [config, DH] = options_DK(config, DH);
     
     t = 0:step:t_lim;                      %Vector de Tiempo
-    q = zeros(max(size(config)),1);        %Vector de Valores de UniÃ³n
+    q = zeros(max(size(config)),1);        %Vector de Valores de Unión
     pos_plot = zeros(3, max(size(t)));
     n = max(size(config));
     
@@ -20,7 +20,7 @@ function Example_DK(t_lim, step, config, DH)
         [origin, R, A] = Dir_Kin(DH, q, config);
         pos_plot(:,i) = origin(:,n);
     
-        %AnimaciÃ³n
+        %Animación
         clf('reset');
         draw_SCs(R, origin);
         plot3(pos_plot(1,:),pos_plot(2,:),pos_plot(3,:));
