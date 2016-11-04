@@ -28,9 +28,11 @@ function [p] = directKinematics(q, n)
     
     A_0n = eye(4);
     
+    p = [0 0 0 1]';
+    
     for i = 1:n
         A_0n = A_0n*A(:,:,i);
     end
     
-    p = A_0n*[0 0 0 1]';
+    p = A_0n*p;
 end
