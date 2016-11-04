@@ -35,18 +35,14 @@ function [Jv, Jw] = getJacobian(varargin)
     A_0im1 = eye(4);
     
     
-    for i = 1:nargin
-        %Jacobiano de vel angular
-        tmp = eye(3);
-        for j = 1:i
-            tmp = tmp*A(1:3,1:3,j);
-            Jw(:,i) = tmp*k;
-        end
-        
+    for i = 1:nargin  
         %Obtener origen del SC i-1 con respecto a SC0
         A_0im1 = A_0im1*A(:,:,i);
         O_im1 = A_0im1*O;
         O_im1 = O_im1(1:3);
+                
+        %Jacobiano de vel angular
+        Jw(:,i) = A_0im1(1:3,1:3)*k;
         
         %Jacobiano de vel lineal
         Jv(:,i) = cross(Jw(:,i), O_0n - O_im1);
