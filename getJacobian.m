@@ -37,7 +37,11 @@ function [Jv, Jw] = getJacobian(varargin)
     
     for i = 1:nargin
         %Jacobiano de vel angular
-        Jw(:,i) = A(1:3,1:3,i)*k;
+        tmp = eye(3);
+        for j = 1:i
+            tmp = tmp*A(1:3,1:3,j);
+            Jw(:,i) = tmp*k;
+        end
         
         %Obtener origen del SC i-1 con respecto a SC0
         A_0im1 = A_0im1*A(:,:,i);
