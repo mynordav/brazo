@@ -39,6 +39,6 @@ function dX = Brazo_sys(t, X)
 end
 
 function [ref, dref] = getRef(t)
-     ref = [1.5*cos(t); 1.5*sin(t); 2];
-     dref =[-1.5*sin(t); 1.5*cos(t); 0];
+     ref  = [0.1*t; 0.1*t*sin(t); 3 + 0.15*t*cos(t)];
+     dref = [0.1; 0.1*sin(t) + 0.1*t*cos(t); -0.15*t*sin(t) + 0.15*cos(t)];
 end
