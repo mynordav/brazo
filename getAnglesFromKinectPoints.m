@@ -5,7 +5,7 @@ BA = [5 0 5; 10 0 10];
 PE = [0 -5 0; 0 -10 0];
 SE = [5 0 0; 10 0 0];
 EF = [0 5 0; 0 10 0];
-O  = [5 5 5];
+O  = [10 -10 30];
 
 %% Definicion de referencias
 Ref_BA_V = [0 1 0];
@@ -15,15 +15,11 @@ Ref_EF_ =  [0 0 -1];
 
 %% Rotaciones y traslaciones correspondientes Kinect a base
 
-K2 =  [ 0 1  0 0;
-        0 0 -1 0;
-       -1 0  0 0;
-        0 0  0 1];
-KB =  [ 1 0  0 O(1);
-        0 1  0 O(2);
-        0 0  1 O(3);
-        0 0  0   1];
-K2B = K2*KB;   
+K2B =  [ 0 1 0  O(1);
+        0 0 -1 -O(2);
+       -1 0  0 -O(3);
+        0 0  0    1];
+
 BArot = [BA [1,1]']*K2B;
 BArot = BArot(:,1:3);
 BA_V = BArot(2,:)-BArot(1,:);
