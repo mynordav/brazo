@@ -24,6 +24,9 @@ BArot = [BA [1,1]']*K2B;
 BArot = BArot(:,1:3);
 BA_V = BArot(2,:)-BArot(1,:);
 Angles(1) = acos(dot(BA_V,Ref_BA_V)/(norm(BA_V)*norm(Ref_BA_V)));
+if BA_V(1)<0
+    Angles(1) = -Angles(1);
+end
 rad2deg(Angles(1))
 
 %% Rotaciones y traslaciones correspondientes base a primer eslabon
@@ -40,6 +43,9 @@ Ref_PE_V = Ref_PE_V(1:3);
 PErot = PErot(:,1:3);
 PE_V = PErot(2,:) - PErot(1,:);
 Angles(2) = acos(dot(PE_V,Ref_PE_V)/(norm(PE_V)*norm(Ref_PE_V)));
+if PE_V(1)<0
+    Angles(2) = -Angles(2);
+end
 rad2deg(Angles(2))
 
 %% Rotaciones y traslaciones correspondientes primer a segundo eslabon
@@ -57,6 +63,9 @@ Ref_SE_V = Ref_SE_V(1:3);
 SErot = SErot(:,1:3);
 SE_V = SErot(2,:) - SErot(1,:);
 Angles(3) = acos(dot(SE_V,Ref_SE_V)/(norm(SE_V)*norm(Ref_SE_V)));
+if SErot_V(1)<0
+    Angles(3) = -Angles(3);
+end
 rad2deg(Angles(3))    
 
 
@@ -75,6 +84,9 @@ Ref_EF_V = Ref_EF_V(1:3);
 EFrot = EFrot(:,1:3);
 EF_V = EFrot(2,:) - EFrot(1,:);
 Angles(4) = acos(dot(EF_V,Ref_EF_V)/(norm(EF_V)*norm(Ref_EF_V)));
+if EF_V(1)<0
+    Angles(4) = -Angles(4);
+end
 rad2deg(Angles(4))
 
 
