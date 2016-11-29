@@ -19,8 +19,9 @@
 C1 = 0;
 C2 = 60/360;
 C3 = 210/360;
-C4 = 120/360;
+C4 = 140/360;
 C5 = 255/360;
+C = struct('R', uint8(30), 'G', uint8(70),   'B',  uint8(35),  'TH', uint8(10)); % Origen 
  
  efec_fin = struct('x1', 0, 'x2', 0, 'y1', 0, 'y2', 0, 'z1', 0, 'z2', 0);
  seg_es   = struct('x1', 0, 'x2', 0, 'y1', 0, 'y2', 0, 'z1', 0, 'z2', 0);
@@ -37,7 +38,13 @@ C5 = 255/360;
 
      %% Get Origin
 
-     center = colorFilter(colorImage,C4);
+     %center = colorFilter(colorImage,C4);
+     %[col, row] = getCoordinates(center, 1080);
+     
+     center = find((colorImage(:,:,1) > (C.R - C.TH) & colorImage(:,:,1) < (C.R + C.TH) ...
+                  & colorImage(:,:,2) > (C.G - C.TH) & colorImage(:,:,2) < (C.G + C.TH)...
+                  & colorImage(:,:,3) > (C.B - C.TH) & colorImage(:,:,3) < (C.B + C.TH) ));
+
      [col, row] = getCoordinates(center, 1080);
 
      %% Color Filters
@@ -55,7 +62,7 @@ C5 = 255/360;
      tic
      figure(1), imshow(colorImage), hold on
 
-     avg = getHoughTransform(ba, 300, 50, 'AVG');
+     avg = getHoughTransform(ba, 300, 50, 'MAX');
      efecFin = avg;
      plot(efecFin(:,1),efecFin(:,2),'LineWidth',2,'Color','yellow');
 
@@ -124,11 +131,12 @@ C5 = 255/360;
     line_1 = a1 - a2;
     line_2 = b1 - b2;
     line_3 = c1 - c2;
-     
+    
+    totalTime = toc
  catch
      disp('Error')
  end
-     totalTime = toc
+     
  
  %while END!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
  end
@@ -143,18 +151,6 @@ C5 = 255/360;
  end
  
  
- function A = RotX(t, p)
-     A = [1 0 0; 0 cos(t) -sin(t); 0 sin(t) cos(t)]*p';
- end
- 
- function A = RotY(t, p)
-     A = [cos(t) 0 sin(t); 0 1 0; -sin(t) 0 cos(t)]*p';
- end
- 
- function A = RotZ(t,p)
-     A = [cos(t) -sin(t) 0; sin(t) cos(t) 0; 0 0 1]*p';
- end
- 
  function band = colorFilter(colorImage, Hue)
     imageHSV = rgb2hsv(colorImage);
      
@@ -166,13 +162,14 @@ C5 = 255/360;
    %filtro = ~(abs(filtro) < 0.08);
     
     V(S<0.5) = 0;
-    V(V<0.5) = 0;
+    V(V<0.3) = 0;
     V(~(abs(filtro) < 0.08)) = 0;
     
     imageHSV(:,:,1) = H;
     imageHSV(:,:,2) = S;
     imageHSV(:,:,3) = V;
     
+    %imshow(hsv2rgb(imageHSV));
     band = rgb2gray(hsv2rgb(imageHSV));
     
  end
