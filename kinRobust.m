@@ -1,138 +1,122 @@
-% Fecha: 26 - Nov - 2016
-% Modificaciones: Mismo Codigo, pero con funciones
-%%
-% clear
-% close all
-% clc
-% imaqreset;
-% 
-% colorVid = imaq.VideoDevice('kinect',1);
-% depthVid = imaq.VideoDevice('kinect',2);
-% step(colorVid);
-% step(depthVid);
-%%
+%initKinect();
+global C1 C2 C3 C4 
 
-close all
-clc
-
-global C1 C2 C3 C4
-
-C2 = struct('R', uint8(125), 'G', uint8(113), 'B',  uint8(41) , 'TH', uint8(10)); % efector final       
-C1 = struct('R', uint8(160), 'G', uint8(60),  'B',  uint8(40) , 'TH', uint8(20)); % segundo eslabon       
-C3 = struct('R', uint8(10) , 'G', uint8(30),  'B',  uint8(80), 'TH', uint8(20)); % primer eslabon
-C4 = struct('R', uint8(170), 'G', uint8(210), 'B',  uint8(100), 'TH', uint8(10)); % Origen 
+C2 = struct('R', uint8(135), 'G', uint8(125), 'B',  uint8(50) , 'TH', uint8(15)); % efector final       
+C1 = struct('R', uint8(185), 'G', uint8(55),  'B',  uint8(45) , 'TH', uint8(20)); % segundo eslabon       
+C3 = struct('R', uint8(15) , 'G', uint8(35),  'B',  uint8(100), 'TH', uint8(20)); % primer eslabon
+C4 = struct('R', uint8(150), 'G', uint8(185), 'B',  uint8(80),  'TH', uint8(10)); % Origen 
 
 efec_fin = struct('x1', 0, 'x2', 0, 'y1', 0, 'y2', 0, 'z1', 0, 'z2', 0);
 seg_es   = struct('x1', 0, 'x2', 0, 'y1', 0, 'y2', 0, 'z1', 0, 'z2', 0);
 prim_es  = struct('x1', 0, 'x2', 0, 'y1', 0, 'y2', 0, 'z1', 0, 'z2', 0);
 
+while(1)
+    try 
+    tic
+        colorImage = step(colorVid);
+        depthImage = step(depthVid);
+        ptCloud = pcfromkinect(depthVid, depthImage,colorImage);
 
-%while(1)
-tic
-colorImage = step(colorVid);
-depthImage = step(depthVid);
-ptCloud = pcfromkinect(depthVid, depthImage,colorImage);
+        %% Get Origin
 
-%% Get Origin
+        center = find((colorImage(:,:,1) > (C4.R - C4.TH) & colorImage(:,:,1) < (C4.R + C4.TH) ...
+                     & colorImage(:,:,2) > (C4.G - C4.TH) & colorImage(:,:,2) < (C4.G + C4.TH)...
+                     & colorImage(:,:,3) > (C4.B - C4.TH) & colorImage(:,:,3) < (C4.B + C4.TH) ));
 
-center = find((colorImage(:,:,1) > (C4.R - C4.TH) & colorImage(:,:,1) < (C4.R + C4.TH) ...
-             & colorImage(:,:,2) > (C4.G - C4.TH) & colorImage(:,:,2) < (C4.G + C4.TH)...
-             & colorImage(:,:,3) > (C4.B - C4.TH) & colorImage(:,:,3) < (C4.B + C4.TH) ));
+        [col, row] = getCoordinates(center, 1080);
 
-[col, row] = getCoordinates(center, 1080);
+        %% Color Filters
 
-%% Color Filters
+        %Final Efector
+        ba = colorFilter(colorImage, C2, 'G');
+        %Second Efector
+        br_V = colorFilter(colorImage, C1, 'R');
+        %Third Efector
+        ba_A = colorFilter(colorImage, C3, 'B');
 
-%Final Efector
-ba = colorFilter(colorImage, C2, 'B');
-%Second Efector
-br_V = colorFilter(colorImage, C1, 'R');
-%Third Efector
-ba_A = colorFilter(colorImage, C3, 'B');
+        %% Compute Hough Transforms
 
-%% compute Hough Transforms
-tic
-figure(1), imshow(colorImage), hold on
+        figure(1), imshow(colorImage), hold on
 
-avg = getHoughTransform(ba, 300, 50, 'AVG');
-efecFin = avg;
-plot(efecFin(:,1),efecFin(:,2),'LineWidth',2,'Color','yellow');
+        avg = getHoughTransform(ba, 200, 50, 'AVG');
+        efecFin = avg;
+        plot(efecFin(:,1),efecFin(:,2),'LineWidth',2,'Color','yellow');
 
-avg = getHoughTransform(br_V, 400, 70, 'MAX');
-segundo_eslabon = avg;
-plot(segundo_eslabon(:,1),segundo_eslabon(:,2),'LineWidth',2,'Color','red');
+        avg = getHoughTransform(br_V, 300, 50, 'MAX');
+        segundo_eslabon = avg;
+        plot(segundo_eslabon(:,1),segundo_eslabon(:,2),'LineWidth',2,'Color','red');
 
-avg = getHoughTransform(ba_A, 300, 50, 'AVG');
-tercer_eslabon = avg;
-plot(tercer_eslabon(:,1),tercer_eslabon(:,2),'LineWidth',2,'Color','blue');
-
-
-%Plotting the center
-plot(col, row,'xr:', 'MarkerSize', 15)
-
-x_dim = flipdim(ptCloud.Location(:,:,1),2);
-y_dim = flipdim(ptCloud.Location(:,:,2),2);
-z_dim = flipdim(ptCloud.Location(:,:,3),2);
-
-%% Getting each pair of x,y,z points fo each 'Eslabon'
-% Origin
-origin = [x_dim(row, col) y_dim(row, col) (z_dim(row, col) - 0.0775)]
-
-% Final Efector point coordinates
-efec_fin.x1 = x_dim(efecFin(3), efecFin(1));
-efec_fin.x2 = x_dim(efecFin(4), efecFin(2));
-
-efec_fin.y1 = y_dim(efecFin(3), efecFin(1));
-efec_fin.y2 = y_dim(efecFin(4), efecFin(2));
-
-efec_fin.z1 = z_dim(efecFin(3), efecFin(1));
-efec_fin.z2 = z_dim(efecFin(4), efecFin(2));
-
-% Second 'Eslabon' point coordinates
-seg_es.x1 = x_dim(segundo_eslabon(3), segundo_eslabon(1));
-seg_es.x2 = x_dim(segundo_eslabon(4), segundo_eslabon(2));
-
-seg_es.y1 = y_dim(segundo_eslabon(3), segundo_eslabon(1));
-seg_es.y2 = y_dim(segundo_eslabon(4), segundo_eslabon(2));
-
-seg_es.z1 = z_dim(segundo_eslabon(3), segundo_eslabon(1));
-seg_es.z2 = z_dim(segundo_eslabon(4), segundo_eslabon(2));
-
-% Third 'Eslabon' point coordinates
-prim_es.x1 = x_dim(tercer_eslabon(3), tercer_eslabon(1));
-prim_es.x2 = x_dim(tercer_eslabon(4), tercer_eslabon(2));
-
-prim_es.y1 = y_dim(tercer_eslabon(3), tercer_eslabon(1));
-prim_es.y2 = y_dim(tercer_eslabon(4), tercer_eslabon(2));
-
-prim_es.z1 = z_dim(tercer_eslabon(3), tercer_eslabon(1));
-prim_es.z2 = z_dim(tercer_eslabon(4), tercer_eslabon(2));
+        avg = getHoughTransform(ba_A, 300, 50, 'AVG');
+        tercer_eslabon = avg;
+        plot(tercer_eslabon(:,1),tercer_eslabon(:,2),'LineWidth',2,'Color','blue');
 
 
-a1 = [efec_fin.x1 efec_fin.y1 efec_fin.z1];
-a2 = [efec_fin.x2 efec_fin.y2 efec_fin.z2];
+        %% Plotting the center
+        plot(col, row,'xr:', 'MarkerSize', 15)
 
-b1 = [seg_es.x1 seg_es.y1 seg_es.z1];
-b2 = [seg_es.x2 seg_es.y2 seg_es.z2];
-% a1 = [efec_fin.x1 efec_fin.y1];
-% a2 = [efec_fin.x2 efec_fin.y2];
+        x_dim = flipdim(ptCloud.Location(:,:,1),2);
+        y_dim = flipdim(ptCloud.Location(:,:,2),2);
+        z_dim = flipdim(ptCloud.Location(:,:,3),2);
 
-% b1 = [seg_es.x1 seg_es.y1];
-% b2 = [seg_es.x2 seg_es.y2];
+        %% Getting each pair of x,y,z points for each Efector
+        % Origin
+        origin = [x_dim(row, col) y_dim(row, col) (z_dim(row, col) - 0.0775)];
+        center = origin;
 
-a = a1 - a2;
-b = b1 - b2;
+        % Final Efector point coordinates
+        efec_fin.x1 = x_dim(efecFin(3), efecFin(1));
+        efec_fin.x2 = x_dim(efecFin(4), efecFin(2));
 
-costheta = dot(a,b)/(norm(a)*norm(b));
-theta = acos(costheta);
+        efec_fin.y1 = y_dim(efecFin(3), efecFin(1));
+        efec_fin.y2 = y_dim(efecFin(4), efecFin(2));
 
-%a_rot = RotX(degtorad(90), a);
+        efec_fin.z1 = z_dim(efecFin(3), efecFin(1));
+        efec_fin.z2 = z_dim(efecFin(4), efecFin(2));
 
-theta_d = 180 - rad2deg(theta)
-totalTime = toc
+        % Second 'Eslabon' point coordinates
+        seg_es.x1 = x_dim(segundo_eslabon(3), segundo_eslabon(1));
+        seg_es.x2 = x_dim(segundo_eslabon(4), segundo_eslabon(2));
 
-%while END!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-%end
+        seg_es.y1 = y_dim(segundo_eslabon(3), segundo_eslabon(1));
+        seg_es.y2 = y_dim(segundo_eslabon(4), segundo_eslabon(2));
+
+        seg_es.z1 = z_dim(segundo_eslabon(3), segundo_eslabon(1));
+        seg_es.z2 = z_dim(segundo_eslabon(4), segundo_eslabon(2));
+
+        % Third 'Eslabon' point coordinates
+        prim_es.x1 = x_dim(tercer_eslabon(3), tercer_eslabon(1));
+        prim_es.x2 = x_dim(tercer_eslabon(4), tercer_eslabon(2));
+
+        prim_es.y1 = y_dim(tercer_eslabon(3), tercer_eslabon(1));
+        prim_es.y2 = y_dim(tercer_eslabon(4), tercer_eslabon(2));
+
+        prim_es.z1 = z_dim(tercer_eslabon(3), tercer_eslabon(1));
+        prim_es.z2 = z_dim(tercer_eslabon(4), tercer_eslabon(2));
+
+        a1 = [efec_fin.x1 efec_fin.y1 efec_fin.z1];
+        a2 = [efec_fin.x2 efec_fin.y2 efec_fin.z2];
+
+        b1 = [seg_es.x1 seg_es.y1 seg_es.z1];
+        b2 = [seg_es.x2 seg_es.y2 seg_es.z2];
+
+        c1 = [prim_es.x1 prim_es.y1 prim_es.z1];
+        c2 = [prim_es.x2 prim_es.y2 prim_es.z2];
+
+        center = origin;
+        ef_finalPos = efec_fin.x1;
+        line_1 = a1 - a2;
+        line_2 = b1 - b2
+        line_3 = c1 - c2;
+        toc
+        
+    catch 
+        disp('Error')
+    end
+end
+
+
+
+%% Functions
 function [c, f] = getCoordinates_V2(a,rows)
     c = ceil(a./rows);
     f = a - (rows*(c - 1));
@@ -183,9 +167,8 @@ function band = colorFilter(colorImage, C, interestBand)
     end
 end
 
-
 function avg = getHoughTransform(band, FillGap, MinLength, type)
-BW_A = edge(band,'Prewitt');
+BW_A = edge(band,'canny');
 
 [H,theta,rho] = hough(BW_A);
 P = houghpeaks(H,5,'threshold',ceil(0.5*max(H(:))));
@@ -221,4 +204,17 @@ avg = 0;
         case 'MAX'
             avg = xy_long;
     end
+end
+
+function initKinect()
+    clear
+    close all
+    clc
+    imaqreset;
+
+    colorVid = imaq.VideoDevice('kinect',1);
+    depthVid = imaq.VideoDevice('kinect',2);
+    step(colorVid);
+    step(depthVid);
+
 end
