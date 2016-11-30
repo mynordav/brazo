@@ -1,6 +1,4 @@
-# brazo
-Proyecto de control automático
+# Hice una versión distinta para la detección de los vectores.
 
-Hoy 2 Nov Rubén se unió. Miguel Rizo se unió.
-
--Ya se puede simular el movimiento del brazo.
+Pros: Está mucho más entendible y corta (al menos creo yo)
+Contras: Es mucho más lenta... Demasiado lenta...
