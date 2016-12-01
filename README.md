@@ -1,4 +1,3 @@
-# Hice una versión distinta para la detección de los vectores.
+# Ya saca ángulos aunque muy ruidosos.
 
-Pros: Está mucho más entendible y corta (al menos creo yo)
-Contras: Es mucho más lenta... Demasiado lenta...
+Se puede mejorar mucho aún.
