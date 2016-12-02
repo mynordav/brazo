@@ -55,38 +55,23 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "GPIO.h"
 /* User includes (#include below this line is not maintained by Processor Expert) */
 
 /*lint -save  -e970 Disable MISRA rule (6.3) checking. */
 
 
+uint16_t string2num(char* pch){
 
-void str2num(char* s) {
+static char str[4];
 
-	uint8_t counter = 0;
-	uint8_t ptr = 0;
-	static uint16_t n = 0;
-	do {
-		counter++;
-		ptr = *(s + counter);
-		//Term1_SendChar(ptr);
-		//Term1_CRLF();
-	} while (ptr != '\0');
+	str[0] = *(pch + 2);
+	str[1] = *(pch + 3);
+	str[2] = *(pch + 4);
 
-	anchosdePulso.pw_EF = (s[3] - 0x30) * 100 + (s[4] - 0x30) * 10
-			+ (s[5] - 0x30);
-	anchosdePulso.pw_SE = (s[8] - 0x30) * 100 + (s[9] - 0x30) * 10
-			+ (s[10] - 0x30);
-	anchosdePulso.pw_PE = (s[13] - 0x30) * 100 + (s[14] - 0x30) * 10
-			+ (s[15] - 0x30);
-	anchosdePulso.pw_BA = (s[18] - 0x30) * 100 + (s[19] - 0x30) * 10
-			+ (s[20] - 0x30);
+	return atoi(str);
 
-	anchosdePulso.ef_Dir = s[21] - 0x30;
-	anchosdePulso.se_Dir = s[22] - 0x30;
-	anchosdePulso.pe_Dir = s[23] - 0x30;
-	anchosdePulso.ba_Dir = s[24] - 0x30;
 }
 
 
@@ -113,9 +98,6 @@ int main(void)
 	 *
 	 *
 	 */
-
-
-
 
 	Term1_SendStr(s0);
 	uint16_t pulseWidth_ef;
@@ -145,16 +127,38 @@ int main(void)
 	anchosdePulso.pe_Dir = 0;
 	anchosdePulso.se_Dir = 1;
 
-	anchosdePulso.pw_EF = 900;
-	anchosdePulso.pw_SE = 900;
-	anchosdePulso.pw_PE = 900;
-	anchosdePulso.pw_BA = 900;
+	anchosdePulso.pw_EF = 100;
+	anchosdePulso.pw_SE = 100;
+	anchosdePulso.pw_PE = 100;
+	anchosdePulso.pw_BA = 100;
+
+
+	char sub_ef[] ="ef";
+	char sub_se[] ="es";
+	char sub_pe[] ="pe";
+	char sub_ba[] ="ba";
+	char sub_dir[] = "dir";
+	char subSTR[4];
+	char* pch;
 
 	for (;;) {
 
 		Term1_ReadLine(&s2);
+		pch = strstr(s2, sub_ef);
+		anchosdePulso.pw_EF = string2num(pch);
+		pch = strstr(s2, sub_se);
+		anchosdePulso.pw_SE = string2num(pch);
+		pch = strstr(s2, sub_pe);
+		anchosdePulso.pw_PE = string2num(pch);
+		pch = strstr(s2, sub_ba);
+		anchosdePulso.pw_BA = string2num(pch);
+		pch = strstr(s2, sub_dir);
+		anchosdePulso.ef_Dir = pch[3] - 0x30;
+		anchosdePulso.se_Dir = pch[4] - 0x30;
+		anchosdePulso.pe_Dir = pch[5] - 0x30;
+		anchosdePulso.ba_Dir = pch[6] - 0x30;
+
 		//Term1_SendStr(&s2);
-		str2num(s2);
 		s2[0] = '\0';
 		PWM1_SetDutyUS(anchosdePulso.pw_EF);
 		PWM2_SetDutyUS(anchosdePulso.pw_SE);
@@ -183,29 +187,29 @@ int main(void)
 
 		Term1_SendStr(&s4);
 		Term1_SendNum((int32_t) anchosdePulso.pw_EF);
-		//Term1_CRLF();
+		Term1_CRLF();
 		Term1_SendNum((int32_t) anchosdePulso.pw_SE);
-		//Term1_CRLF();
+		Term1_CRLF();
 		Term1_SendNum((int32_t) anchosdePulso.pw_PE);
-		//Term1_CRLF();
+		Term1_CRLF();
 		Term1_SendNum((int32_t) anchosdePulso.pw_BA);
-		//Term1_CRLF();
+		Term1_CRLF();
 		Term1_SendStr("Direcciones: ");
-		//Term1_CRLF();
+		Term1_CRLF();
 		Term1_SendStr("Efector Final: ");
-		//Term1_CRLF();
+		Term1_CRLF();
 		Term1_SendNum((uint32_t) anchosdePulso.ef_Dir);
-		//Term1_CRLF();
+		Term1_CRLF();
 		Term1_SendStr("Segundo eslabon: ");
-		//Term1_CRLF();
+		Term1_CRLF();
 		Term1_SendNum((uint32_t) anchosdePulso.se_Dir);
-		//Term1_CRLF();
+		Term1_CRLF();
 		Term1_SendStr("Primer eslabon: ");
-		//Term1_CRLF();
+		Term1_CRLF();
 		Term1_SendNum((uint32_t) anchosdePulso.pe_Dir);
-		//Term1_CRLF();
+		Term1_CRLF();
 		Term1_SendStr("Base: ");
-		//Term1_CRLF();
+		Term1_CRLF();
 		Term1_SendNum((uint32_t) anchosdePulso.ba_Dir);
 		Term1_CRLF();
 
