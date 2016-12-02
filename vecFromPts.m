@@ -9,7 +9,7 @@ function [v, newLastPoint] = vecFromPts(ptCloudLoc, p1, p2, lastPoint)
     else
         v = v1 - v2;
         newLastPoint = v1;
-        disp('hola')
+        %disp('hola')
     end
         v = v/norm(v);
 end
