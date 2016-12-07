@@ -1,3 +1,4 @@
-# Ya saca ángulos aunque muy ruidosos.
+# Proyecto Final Control Automático
 
-Se puede mejorar mucho aún.
+6 / DiCIEMBRE / 2016
+
