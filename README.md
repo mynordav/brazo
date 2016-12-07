@@ -1,6 +1,3 @@
-# brazo
-Proyecto de control automático
+# Ya saca ángulos aunque muy ruidosos.
 
-Hoy 2 Nov Rubén se unió. Miguel Rizo se unió.
-
--Ya se puede simular el movimiento del brazo.
+Se puede mejorar mucho aún.
